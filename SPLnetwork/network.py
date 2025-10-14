@@ -103,9 +103,7 @@ class Network:
     ):
         
         # alter the channel instance such that x is in relative coordinates along the trunk
-        # print("properties of loaded instance", channel_instance.x.min(), channel_instance.x.max(), self.trunk.x[node_id])
         channel_instance.x += self.trunk.x[node_id]
-        print("shifted channel instance base", channel_instance.x.min())
         
         # add instance to the internal dict
         self.tributaries[node_id] = channel_instance
@@ -197,14 +195,10 @@ if __name__ == "__main__":
         uplift_rate=U,
         drainage_area=(2, 1.5)
     )
-    print("properties of trib1", trib1.x)
-    print("properties of trib2", trib2.x)
-
     
     network = Network(
         trunk=trunk
     )
-    
     
     network.attach_tributary(
         node_id=int(len(xtrunk)/3),
@@ -215,9 +209,6 @@ if __name__ == "__main__":
         node_id=2*int(len(xtrunk)/3),
         channel_instance=trib2
     )
-    
-    print("properties of trib1 after attaching", trib1.x)
-    print("properties of trib2 after attaching", trib2.x)
     
     fg, ax = plt.subplots(1, 2)
     ax[0].plot(network.trunk.x, network.trunk.A)
@@ -240,6 +231,5 @@ if __name__ == "__main__":
 
     for node, channel in network.tributaries.items():
         plt.plot(channel.x, channel.z)
-    plt.show()
     plt.show()
     
