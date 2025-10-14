@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["SPLnetwork"]
+
+[project]
+name = "SPLnetwork"
+version = "0.0.1"
+authors = [
+  { name = "Lennart Grimm" }
+]
+description = "A simple 1D model of bedrock river channel networks."
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+  "numpy",
+  "matplotlib"
+]
