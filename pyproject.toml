@@ -3,10 +3,10 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["SPLnetwork"]
+packages = ["pyStreams"]
 
 [project]
-name = "SPLnetwork"
+name = "pyStreams"
 version = "0.0.1"
 authors = [
   { name = "Lennart Grimm" }
