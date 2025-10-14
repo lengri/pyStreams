@@ -1,1 +1,2 @@
-landplotlib is a wrapper around some useful function in landlab and matplotlib.
+pyStreams is a simple implementation of the bedrock river Stream Power Law in Python. It also allows you to create a simple network of
+rivers with one trunk and an arbitrary amount of tributary streams.
