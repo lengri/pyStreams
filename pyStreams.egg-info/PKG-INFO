@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: pyStreams
+Version: 0.0.1
+Summary: A simple 1D model of bedrock river channel networks.
+Author: Lennart Grimm
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENCE
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+Dynamic: license-file
+
+pyStreams is a simple implementation of the bedrock river Stream Power Law in Python. It also allows you to create a simple network of
+rivers with one trunk and an arbitrary amount of tributary streams.

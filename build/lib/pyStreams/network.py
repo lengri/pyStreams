@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import warnings
 
 class Channel:
     
@@ -193,24 +192,6 @@ class Network:
         self.trunk = trunk
         self.tributaries = {}
     
-    """def _get_network_A(self):
-        
-        A_dict = {"-1": self.trunk.A.copy()}
-
-        for node, trib in self.tributaries.items():
-            A_dict[node] = trib.A.copy()
-        
-        self.A_dict = A_dict
-        return A_dict
-    
-    def _set_network_A(self):
-        
-        # Run this for each time step in case A has been changed somewhere.
-        old_state = self.A_dict.copy()
-        
-        new_state = self._get_network_A()"""
-        
-    
     def _fix_tributary_elevations(self):
         # fix all the tribuary elevations to be at the right heights
         for node, channel in self.tributaries.items():
@@ -222,7 +203,7 @@ class Network:
         channel_instance: Channel
     ):
         """
-        Places a tributary at the defined node along the main channel. 
+        Places a triburary at the defined node along the main channel. 
         Automatically matches elevations and upstream distances.
         
         Parameters:
@@ -243,9 +224,6 @@ class Network:
         self.trunk.A[:node_id] += channel_instance.A[0]
         
         self._fix_tributary_elevations()
-        
-        # create a new attribute
-        setattr(self, f"tributary_{node_id}", channel_instance)
         
     def evolve_network(
         self,
@@ -321,37 +299,7 @@ class Network:
         trunk.calculate_chi(reference_drainage_area=reference_drainage_area)
         for trib in self.tributaries.values():
             trib.calculate_chi(reference_drainage_area=reference_drainage_area)
-    
-    def update_tributary_drainage_area(
-        self,
-        node_id: int,
-        drainage_area: np.ndarray|tuple|None = None,
-        drainage_area_change_fraction: float|None = None
-    ):
-        
-        trib = self.tributaries[node_id]
-        Amax_old = trib.A[0].copy()
-        
-        if drainage_area is None and drainage_area_change_fraction is None:
-            return 0 # do nothing
-        
-        if drainage_area is not None and drainage_area_change_fraction is not None:
-            # warning
-            warnings.warn("Ambiguous definition of drainage_area change!")
-        
-        if type(drainage_area) is np.ndarray:
-            trib.A = drainage_area
-        
-        if type(drainage_area) is tuple:
-            trib.A = drainage_area[0]*(trib.x.max()-trib.x)**drainage_area[1] + trib.minA
-        
-        if drainage_area_change_fraction is not None:
-            trib.change_drainage_area_by_fraction(drainage_area_change_fraction)
-        
-        # adjust the draiange areas of all downstream nodes of the main stream
-        self.trunk.A[:node_id] -= Amax_old 
-        self.trunk.A[:node_id] += trib.A[0]
-        
+            
     def create_data_snapshot():
         pass # Save all the data at the current time step to a dict
     
@@ -403,15 +351,20 @@ if __name__ == "__main__":
     )
 
     network.attach_tributary(
-        node_id=100,
+        node_id=5,
         channel_instance=trib2
     )
-    network.attach_tributary(
-        node_id=400,
-        channel_instance=trib1
-    )    
     
-    fg, ax = plt.subplots(1, 3, figsize=(7.5, 4), tight_layout=True)
+    network.attach_tributary(
+        node_id=int(len(xtrunk)/3),
+        channel_instance=trib1
+    )
+
+    plt.plot(network.trunk.x, network.trunk.A)
+    plt.show()
+    print(network.tributaries)
+    
+    fg, ax = plt.subplots(1, 2, figsize=(7.5, 4), tight_layout=True)
     
     # Channel profiles in initial state
     ax[0].plot(network.trunk.x, network.trunk.z, c="black", lw=2, label=r"$t=0$ Ma")
@@ -424,23 +377,16 @@ if __name__ == "__main__":
     ax[1].plot(network.trunk.chi, network.trunk.z, c="black", lw=2)
     for node, channel in network.tributaries.items():
         ax[1].plot(channel.chi, channel.z, c="red", lw=1.5)
-        
-    # Drainage areas
-    ax[2].plot(network.trunk.x, network.trunk.A, c="black", lw=2)
-    for node, channel in network.tributaries.items():
-        ax[2].plot(channel.x, channel.A, c="red", lw=1.5)
     
     fraction = [0.02, 0.005]
     for i in range(0, 1000):
         # iterate over tribs and reduce drainage area
         if i < 100:
-            for j, trib_id in enumerate(network.tributaries.keys()):
-                network.update_tributary_drainage_area(
-                    trib_id, 
-                    drainage_area_change_fraction=fraction[j]
-                )
+            for j, trib in enumerate(network.tributaries.values()):
+                pass
+                # trib.change_drainage_area_by_fraction(fraction[j])
         # evolve network for one step
-        network.evolve_network(dt=dt)
+        network.evolve_network(dt=dt, uplift_rate=2e-3)
         
     # Channel profiles after model run
     ax[0].plot(network.trunk.x, network.trunk.z, c="black", lw=2, ls="dashed", label=r"$t=0.5$ Ma")
@@ -450,19 +396,14 @@ if __name__ == "__main__":
     network.calculate_chi()
     
     ax[1].plot(network.trunk.chi, network.trunk.z, c="black", lw=2, ls="dashed")
+
     for node, channel in network.tributaries.items():
         ax[1].plot(channel.chi, channel.z, c="red", lw=1.5, ls="dashed")
-        
-    ax[2].plot(network.trunk.x, network.trunk.A, c="black", lw=2, ls="dashed")
-    for node, channel in network.tributaries.items():
-        ax[2].plot(channel.x, channel.A, c="red", lw=1.5, ls="dashed")
         
     ax[0].set_ylabel("Elevation [m]")
     ax[0].set_xlabel("Upstream distance [m]")
     ax[1].set_xlabel("Chi [m]")
-    ax[2].set_ylabel("Drainage area [m^2]")
-    ax[2].set_xlabel("Upstream distance [m]")
-    ax[2].set_yscale("log")
+    
     ax[0].legend(frameon=False)
     plt.show()
     
